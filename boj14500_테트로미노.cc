@@ -1,46 +1,68 @@
 #include <iostream>
 #include <vector>
 #include <math.h>
+
 using namespace std;
 
 const int dx[4]{-1,0,0,1};
-const int board[500][500];
+const int dy[4]{0,-1,1,0};
 
-int findMaxNumBlueRot0(int N, int M){
-    int max = 0;
-    for(int i = 0; i < N; i ++){
-        for(int j = 0; j < M-3 ; j ++) {
-            int sum = 0;
-            for(int k = 0 ; k < 4; k ++) {
-                sum += board[i][j+k];
-            }
-            max>sum? max=max:max=sum;
-        }
-    }
-}
-int findMaxNumBlueRot1(int N, int M){
-    int max = 0;
-    for(int i = 0; i < N-3; i ++){
-        for(int j = 0; j < M ; j ++) {
-            int sum = 0;
-            for(int k = 0 ; k < 4; k ++) {
-                sum += board[i+k][j];
-            }
-            max>sum? max=max:max=sum;
-        }
-    }
+bool accessBoard[4][10] = {false, };
+
+std::vector<int> sumList;
+
+bool checkBound(int y, int x, std::vector<std::vector<int>> board) {
+  bool ok = true;
+  if(y>=board.size() || y < 0 || x >= board[0].size() || x < 0) {
+    ok = false;
+  }
+  if(accessBoard[y][x]) {
+    ok = false;
+  }  
+  return ok;
 }
 
-int findMaxNumYellowRot1(int N, int M){
-    int max = 0;
-    for(int i = 0; i < N-1; i ++){
-        for(int j = 0; j < M-1 ; j ++) {
-            int sum = 0;
-            sum = board[i][j]+board[i+1][j]+board[i][j+1]+board[i+1][j+1];
-            max>sum? max=max:max=sum;
-        }
-    }
+void bfs(int y, int x, std::vector<std::vector<int>> board, int count, int sum) {
+ accessBoard[y][x] = true;
+ if(count == 4) {
+    sumList.push_back(sum+board[y][x]);
+    accessBoard[y][x] = false;
+    return;
+ }
+ for(int i = 0 ; i < 4 ; i ++) {
+  const int ny = y+dy[i];
+  const int nx = x+dx[i];
+  if(checkBound(ny, nx, board)) {
+    bfs(ny, nx ,board, count+1, sum + board[y][x]);
+  }
+ }
+ accessBoard[y][x] = false;
 }
-int main{
+
+int findMax(std::vector<int> list) {
+    int max = -1;
+    for(int i : list) {
+        max = std::max(max, i);
+    }
+    return max;
+} 
+
+int main(){
+    int y, x;
+    std::cin >> y >> x;
+    std::vector<std::vector<int>> board(y, std::vector<int>(x));
+    for(int i = 0 ; i < y ; i ++) {
+     for(int j = 0 ; j < x; j ++) {
+        std::cin >>board[i][j];
+     }
+    }
+    
+    for(int i = 0 ; i < y ; i ++) {
+     for(int j = 0 ; j < x; j ++) {
+        bfs(i,j,board,1,0);
+     }
+    }
+    std::cout << findMax(sumList);
+
 
 }
